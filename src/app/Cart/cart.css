@@ -1,0 +1,14 @@
+.cart {
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-items: center;
+	align-items: center;
+	padding: 1rem;
+	border: 10px;
+	border-color: black;
+	border-radius: 1rem;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	background-color: white;
+}
