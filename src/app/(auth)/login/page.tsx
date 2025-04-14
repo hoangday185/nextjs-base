@@ -1,5 +1,14 @@
-const loginPage = () => {
-	return <div>Login page</div>;
+"use client";
+import { useState } from "react";
+
+const LoginPage = () => {
+	const [email] = useState<string>("hoangday185@gmail.com");
+	return (
+		<div>
+			Login page
+			{email}
+		</div>
+	);
 };
 
-export default loginPage;
+export default LoginPage;
