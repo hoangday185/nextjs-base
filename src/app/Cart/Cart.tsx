@@ -7,7 +7,7 @@ const Cart = () => {
 	const [expending] = React.useState(false);
 	return (
 		<div
-			className={clsx("card", {
+			className={clsx("cart", {
 				[custom.cart]: expending,
 			})}
 		>
