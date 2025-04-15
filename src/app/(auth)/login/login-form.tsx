@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoginBody, LoginBodyType } from "@/schemaValidations/auth.schema";
-import envConfig from "@/config";
-import { useAppContext } from "@/app/AppProvider";
+import authApiRequest from "@/apiRequest/auth";
+import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
-	const { setSessionToken } = useAppContext();
+	const router = useRouter();
 	const form = useForm<LoginBodyType>({
 		resolver: zodResolver(LoginBody),
 		defaultValues: {
@@ -32,46 +32,13 @@ const LoginForm = () => {
 		//bên client ko thể lấy ra process.env chỉ được object rỗng :), còn server thì thoải mái
 		//muốn lấy được NEXT_PUBLIC_API_ENDPOINT process.env.NEXT_PUBLIC_API_ENDPOINT
 		try {
-			const res = await fetch(
-				`${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/login`,
-				{
-					body: JSON.stringify(values),
-					headers: {
-						"Content-Type": "application/json",
-					},
-					method: "POST",
-				}
-			).then(async (res) => {
-				const payload = await res.json();
-				const data = {
-					status: res.status,
-					payload: payload.data,
-				};
-				if (!res.ok) {
-					throw data;
-				}
-				return data;
+			const res = await authApiRequest.login(values);
+
+			await authApiRequest.auth({
+				sessionToken: res.payload.data.token,
 			});
 
-			const result = await fetch("/api/auth", {
-				method: "POST",
-				body: JSON.stringify(res),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}).then(async (res) => {
-				const payload = await res.json();
-				const data = {
-					status: res.status,
-					payload,
-				};
-				if (!res.ok) {
-					throw data;
-				}
-				return data;
-			});
-
-			setSessionToken(result.payload.token);
+			router.push("/me");
 		} catch (error) {
 			//disable eslint inline here
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any

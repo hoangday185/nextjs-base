@@ -19,6 +19,6 @@ const middleware = (req: NextRequest) => {
 };
 
 export const config = {
-	matcher: [...authPath, ...privatePath],
+	matcher: ["/login", "/register", "/me"],
 };
 export default middleware;

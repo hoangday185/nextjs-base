@@ -16,9 +16,13 @@ import {
 	RegisterBody,
 	RegisterBodyType,
 } from "@/schemaValidations/auth.schema";
-import envConfig from "@/config";
+
+import authApiRequest from "@/apiRequest/auth";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const RegisterForm = () => {
+	const router = useRouter();
 	const form = useForm<RegisterBodyType>({
 		resolver: zodResolver(RegisterBody),
 		defaultValues: {
@@ -33,17 +37,35 @@ const RegisterForm = () => {
 	async function onSubmit(values: RegisterBodyType) {
 		//bên client ko thể lấy ra process.env chỉ được object rỗng :), còn server thì thoải mái
 		//muốn lấy được NEXT_PUBLIC_API_ENDPOINT process.env.NEXT_PUBLIC_API_ENDPOINT
-		const res = await fetch(
-			`${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/register`,
-			{
-				body: JSON.stringify(values),
-				headers: {
-					"Content-Type": "application/json",
-				},
-				method: "POST",
+		try {
+			const res = await authApiRequest.register(values);
+
+			await authApiRequest.auth({
+				sessionToken: res.payload.data.token,
+			});
+
+			router.push("/me");
+		} catch (error) {
+			//disable eslint inline here
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const err = (error as any).payload.errors as {
+				field: string;
+				message: string;
+			}[];
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const status = (error as any).status as number;
+			if (status === 422) {
+				err.forEach((e) => {
+					form.setError(e.field as keyof RegisterBodyType, {
+						type: "manual",
+						message: e.message,
+					});
+				});
+			} else {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				toast("lỗi", (error as any).payload.message);
 			}
-		).then((res) => res.json());
-		console.log(res);
+		}
 	}
 
 	return (
