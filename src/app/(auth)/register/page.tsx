@@ -1,13 +1,14 @@
-"use client";
-import { ModeToggle } from "@/components/toggle-mode";
+import RegisterForm from "./register-form";
 
-const registerPage = () => {
+const RegisterPage = () => {
 	return (
 		<div>
-			<ModeToggle />
-			Register page
+			<h1 className="text-center text-xl font-semibold">Đăng ký</h1>
+			<div className="flex justify-center">
+				<RegisterForm />
+			</div>
 		</div>
 	);
 };
 
-export default registerPage;
+export default RegisterPage;

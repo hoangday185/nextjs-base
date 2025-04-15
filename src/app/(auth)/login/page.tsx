@@ -1,14 +1,5 @@
-"use client";
-import { useState } from "react";
-
 const LoginPage = () => {
-	const [email] = useState<string>("hoangday185@gmail.com");
-	return (
-		<div>
-			Login page
-			{email}
-		</div>
-	);
+	return <div>Login page</div>;
 };
 
 export default LoginPage;
