@@ -1,4 +1,5 @@
 import { LoginResType } from "@/schemaValidations/auth.schema";
+import { normalizePath } from "./utils";
 
 type CustomOptions = Omit<RequestInit, "method"> & {
 	baseUrl?: string;
@@ -104,16 +105,25 @@ const request = async <Response>(
 		if (res.status === ENTITY_ERROR_STATUS) {
 			throw new EntityError(res.status, payload as EntityErrorPayload);
 		}
+		console.log(res);
 		throw new HttpError({
 			status: res.status,
-			payload: payload as { message: string; [key: string]: unknown },
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			payload: payload as any,
 		});
 	}
 
-	if (["/auth/login", "/auth/register"].includes(url)) {
-		sessionToken.value = (payload as LoginResType).data.token;
-	} else if ("/auth/logout" === url) {
-		sessionToken.value = "";
+	//đảm bảo sessionToken chỉ được set ở client, vì ở server không có window
+	if (typeof window !== "undefined") {
+		if (
+			["auth/login", "auth/register"].some(
+				(item) => item === normalizePath(url)
+			)
+		) {
+			sessionToken.value = (payload as LoginResType).data.token;
+		} else if ("auth/logout" === normalizePath(url)) {
+			sessionToken.value = "";
+		}
 	}
 
 	return data;

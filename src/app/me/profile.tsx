@@ -7,7 +7,7 @@ import { sessionToken } from "@/lib/http";
 const Profile = () => {
 	useEffect(() => {
 		const fetchRequest = async () => {
-			const res = await accountApiRequest.me(sessionToken.value);
+			const res = await accountApiRequest.me(sessionToken.value as string);
 			return res;
 		};
 
