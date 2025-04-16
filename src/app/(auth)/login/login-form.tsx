@@ -1,9 +1,8 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import {
 	Form,
 	FormControl,
@@ -16,8 +15,10 @@ import { Input } from "@/components/ui/input";
 import { LoginBody, LoginBodyType } from "@/schemaValidations/auth.schema";
 import authApiRequest from "@/apiRequest/auth";
 import { useRouter } from "next/navigation";
+import { handleErrorApi } from "@/lib/utils";
 
 const LoginForm = () => {
+	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 	const form = useForm<LoginBodyType>({
 		resolver: zodResolver(LoginBody),
@@ -29,8 +30,10 @@ const LoginForm = () => {
 
 	// 2. Define a submit handler.
 	async function onSubmit(values: LoginBodyType) {
+		if (loading) return;
 		//bên client ko thể lấy ra process.env chỉ được object rỗng :), còn server thì thoải mái
 		//muốn lấy được NEXT_PUBLIC_API_ENDPOINT process.env.NEXT_PUBLIC_API_ENDPOINT
+		setLoading(true);
 		try {
 			const res = await authApiRequest.login(values);
 
@@ -40,25 +43,13 @@ const LoginForm = () => {
 
 			router.push("/me");
 		} catch (error) {
-			//disable eslint inline here
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const err = (error as any).payload.errors as {
-				field: string;
-				message: string;
-			}[];
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const status = (error as any).status as number;
-			if (status === 422) {
-				err.forEach((e) => {
-					form.setError(e.field as keyof LoginBodyType, {
-						type: "manual",
-						message: e.message,
-					});
-				});
-			} else {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				toast("lỗi", (error as any).payload.message);
-			}
+			handleErrorApi({
+				error,
+				setError: form.setError,
+				duration: 1000,
+			});
+		} finally {
+			setLoading(false);
 		}
 	}
 

@@ -1,15 +1,50 @@
 import { LoginResType } from "@/schemaValidations/auth.schema";
 
-type CustomOptions = RequestInit & {
+type CustomOptions = Omit<RequestInit, "method"> & {
 	baseUrl?: string;
 };
 
-class HttpError<T> extends Error {
+export class HttpError extends Error {
 	status: number;
-	payload: T;
-	constructor({ status, payload }: { status: number; payload: T }) {
+	payload: {
+		message: string;
+		[key: string]: unknown;
+	};
+	constructor({
+		status,
+		payload,
+	}: {
+		status: number;
+		payload: {
+			message: string;
+			[key: string]: unknown;
+		};
+	}) {
 		super("HttpError");
 		this.status = status;
+		this.payload = payload;
+	}
+}
+
+const ENTITY_ERROR_STATUS = 422;
+
+type EntityErrorPayload = {
+	message: string;
+	errors: {
+		field: string;
+		message: string;
+	}[];
+};
+
+export class EntityError extends HttpError {
+	status: 422;
+	payload: EntityErrorPayload;
+	constructor(status: number, payload: EntityErrorPayload) {
+		super({
+			status: ENTITY_ERROR_STATUS,
+			payload,
+		});
+		this.status = status as 422;
 		this.payload = payload;
 	}
 }
@@ -66,7 +101,13 @@ const request = async <Response>(
 	};
 
 	if (!res.ok) {
-		throw new HttpError(data);
+		if (res.status === ENTITY_ERROR_STATUS) {
+			throw new EntityError(res.status, payload as EntityErrorPayload);
+		}
+		throw new HttpError({
+			status: res.status,
+			payload: payload as { message: string; [key: string]: unknown },
+		});
 	}
 
 	if (["/auth/login", "/auth/register"].includes(url)) {
