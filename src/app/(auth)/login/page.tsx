@@ -1,12 +1,14 @@
 "use client";
-import { useState } from "react";
+
+import LoginForm from "./login-form";
 
 const LoginPage = () => {
-	const [email] = useState<string>("hoangday185@gmail.com");
 	return (
 		<div>
-			Login page
-			{email}
+			<h1 className="text-center">Đăng nhập</h1>
+			<div className="flex justify-center w-full flex-shrink-0">
+				<LoginForm />
+			</div>
 		</div>
 	);
 };

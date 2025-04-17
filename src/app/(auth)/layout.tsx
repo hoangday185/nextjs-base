@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Header from "@/components/Header";
 
 export default function AuthLayout({
 	children,
@@ -7,7 +7,7 @@ export default function AuthLayout({
 }>) {
 	return (
 		<div>
-			<Link href={"/"}>Home</Link>
+			<Header />
 			{children}
 		</div>
 	);

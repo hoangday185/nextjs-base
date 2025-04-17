@@ -6,11 +6,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
-  baseDirectory: __dirname,
+	baseDirectory: __dirname,
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+	...compat.extends("next/core-web-vitals", "next/typescript"),
+	...compat.config("eslint-config-prettier", {
+		overrides: [
+			{
+				files: ["*.ts", "*.tsx"],
+				rules: {
+					"@typescript-eslint/no-unused-vars": "off",
+					"@typescript-eslint/no-explicit-any": "off",
+					"@typescript-eslint/no-non-null-assertion": "off",
+					"@typescript-eslint/no-empty-function": "off",
+				},
+			},
+		],
+	}),
 ];
 
 export default eslintConfig;
