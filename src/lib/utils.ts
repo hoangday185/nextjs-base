@@ -1,3 +1,4 @@
+import { decode } from "jsonwebtoken";
 import { clsx, type ClassValue } from "clsx";
 import { UseFormSetError } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
@@ -14,7 +15,6 @@ export const handleErrorApi = ({
 	duration,
 }: {
 	error: unknown;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	setError?: UseFormSetError<any>;
 	duration?: number;
 }) => {
@@ -35,4 +35,8 @@ export const handleErrorApi = ({
 //xóa đi ký tự đầu tiên của path
 export const normalizePath = (path: string) => {
 	return path.startsWith("/") ? path.slice(1) : path;
+};
+
+export const decodeJWT = <Payload = any>(token: string) => {
+	return decode(token) as Payload;
 };

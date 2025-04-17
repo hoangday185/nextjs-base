@@ -2,10 +2,25 @@ import authApiRequest from "@/apiRequest/auth";
 import { HttpError } from "@/lib/http";
 import { cookies } from "next/headers";
 
-export async function POST() {
+export async function POST(req: Request) {
+	const res = await req.json();
+	const force = res.force as boolean | undefined;
 	const cookiesStore = await cookies();
-	const sessionToken = cookiesStore.get("sessionToken")?.value;
-	if (!sessionToken) {
+	const sessionTokenFormRes = cookiesStore.get("sessionToken")?.value;
+	if (force) {
+		//xóa cookie ở client
+		return Response.json(
+			{ message: "Buộc đăng xuất thành công" },
+			{
+				status: 200,
+				headers: {
+					"Set-Cookie": `sessionToken=; Path=/;  HttpOnly;`,
+				},
+			}
+		);
+	}
+
+	if (!sessionTokenFormRes) {
 		return Response.json(
 			{ message: "ko nhận được token" },
 			{
@@ -15,7 +30,9 @@ export async function POST() {
 	}
 
 	try {
-		const res = await authApiRequest.logoutFormNextServerToServer(sessionToken);
+		const res = await authApiRequest.logoutFormNextServerToServer(
+			sessionTokenFormRes
+		);
 		return Response.json(res, {
 			status: 200,
 			headers: {

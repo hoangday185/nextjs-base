@@ -12,7 +12,7 @@ const AppProvider = ({
 	useState(() => {
 		if (typeof window !== "undefined") sessionToken.value = initialSessionToken;
 	});
-	return <>{children}</>;
+	return children;
 };
 
 export default AppProvider;

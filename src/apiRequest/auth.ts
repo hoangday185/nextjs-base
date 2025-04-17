@@ -27,8 +27,14 @@ const authApiRequest = {
 				},
 			}
 		),
-	logoutFormNextClientToServer: () =>
-		http.post<MessageResType>("/api/auth/logout", {}, { baseUrl: "" }),
+	logoutFormNextClientToServer: (force?: true, signal?: AbortSignal) =>
+		http.post<MessageResType>(
+			"/api/auth/logout",
+			{
+				force,
+			},
+			{ baseUrl: "", signal }
+		),
 };
 
 export default authApiRequest;
