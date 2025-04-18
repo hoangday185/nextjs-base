@@ -32,7 +32,7 @@ const LoginForm = () => {
 			const res = await authRequest.login(values);
 
 			await authRequest.auth({ sessionToken: res.payload.data.token });
-			console.log(clientSessionToken.value);
+
 			router.push("/me");
 		} catch (error) {
 			handleErrorApi(error, form.setError);

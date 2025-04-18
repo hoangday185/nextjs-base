@@ -1,5 +1,6 @@
 import envConfig from "@/config";
 import { LoginResType } from "@/schemaValidations/auth.schema";
+import { redirect } from "next/navigation";
 import { set } from "zod";
 
 const UNPROCCESSED_ERROR_STATUS = 422;
@@ -18,8 +19,10 @@ export class UnprocessedError extends HttpError {
 	statusCode: 422;
 	payload: { errors: { field: string; message: string }[] } = { errors: [] };
 	constructor({
+		statusCode = UNPROCCESSED_ERROR_STATUS,
 		payload,
 	}: {
+		statusCode?: number;
 		payload: { errors: { field: string; message: string }[] };
 	}) {
 		super({ statusCode: UNPROCCESSED_ERROR_STATUS, payload: { errors: [] } });
@@ -45,24 +48,26 @@ class SessionToken {
 
 export const clientSessionToken = new SessionToken();
 
-type CustomOptions = Omit<RequestInit, "body"> & {
-	baseUrl: string;
-	body?: any;
+type CustomOptions = Omit<RequestInit, "method"> & {
+	baseUrl?: string;
 };
-
+let clientRequest: Promise<any> | null = null;
 const request = async <Response>(
 	method: "GET" | "POST" | "PUT" | "DELETE",
 	url: string,
 	options?: CustomOptions
 ) => {
-	const baseHeader = {
+	const body = options?.body ? JSON.stringify(options?.body) : undefined;
+	const baseHeaders = {
 		"Content-Type": "application/json",
+		Authorization: clientSessionToken.value
+			? `Bearer ${clientSessionToken.value}`
+			: "",
 	};
-
 	const baseUrl =
 		options?.baseUrl === undefined
 			? process.env.NEXT_PUBLIC_API_ENDPOINT
-			: options.baseUrl;
+			: options?.baseUrl;
 
 	const fullUrl = url.startsWith("/")
 		? `${baseUrl}${url}`
@@ -70,46 +75,81 @@ const request = async <Response>(
 
 	const res = await fetch(fullUrl, {
 		...options,
-		method,
-		body: options?.body ? JSON.stringify(options.body) : undefined,
 		headers: {
-			...baseHeader,
+			...baseHeaders,
 			...options?.headers,
 		},
+		method,
+		body: body,
 	});
 
 	const payload: Response = await res.json();
+
+	const data = {
+		statusCode: res.status,
+		payload: payload,
+	};
+
 	if (!res.ok) {
 		if (res.status === UNPROCCESSED_ERROR_STATUS) {
-			throw new UnprocessedError({ payload: payload as any });
+			throw new UnprocessedError(data as any);
+		} else if (res.status === 401) {
+			if (typeof window === "undefined") {
+				//server side
+				const sessionToken = (options as any).headers?.Authorization?.split(
+					" "
+				)[1];
+				redirect(`/logout?sessionToken=${sessionToken}`);
+			} else {
+				if (!clientRequest) {
+					clientRequest = fetch("/api/auth/logout", {
+						method: "POST",
+						body: JSON.stringify({ force: true }),
+						headers: {
+							"Content-Type": "application/json",
+						},
+					});
+
+					await clientRequest;
+					clientRequest = null;
+					clientSessionToken.value = "";
+					location.href = "/login";
+				}
+			}
 		} else {
-			throw new HttpError({ statusCode: res.status, payload });
+			throw new HttpError(data);
 		}
 	}
 
 	if (typeof window !== "undefined") {
 		if (["/auth/login", "/auth/register"].includes(url)) {
 			clientSessionToken.value = (payload as LoginResType).data.token;
-		} else if ("/auth/logut" === url) {
+		} else if ("/auth/logout" === url) {
 			clientSessionToken.value = "";
 		}
 	}
 
-	return {
-		statusCode: res.status,
-		payload: payload,
-	};
+	return data;
 };
 
 const http = {
 	get: <Response>(url: string, options: CustomOptions) =>
 		request<Response>("GET", url, options),
-	post: <Response>(url: string, body: any, options?: CustomOptions) =>
-		request<Response>("POST", url, { ...options, ...body }),
-	put: <Response>(url: string, body: any, options?: CustomOptions) =>
-		request<Response>("PUT", url, { ...options, ...body }),
-	delete: <Response>(url: string, body: any, options?: CustomOptions) =>
-		request<Response>("DELETE", url, { ...options, ...body }),
+	post: <Response>(
+		url: string,
+		body: any,
+		options?: Omit<CustomOptions, "body"> | undefined
+	) => request<Response>("POST", url, { ...options, body }),
+	put: <Response>(
+		url: string,
+		body: any,
+		options?: Omit<CustomOptions, "body"> | undefined
+	) => request<Response>("PUT", url, { ...options, body }),
+	delete: <Response>(
+		url: string,
+		body: any,
+		options?: Omit<CustomOptions, "body"> | undefined
+	) => request<Response>("DELETE", url, { ...options, body }),
 };
 
 export default http;
