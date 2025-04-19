@@ -1,6 +1,7 @@
 import productApRequest from "@/apiRequest/product";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 const ProductList = async () => {
 	const res = await productApRequest.get();
@@ -8,7 +9,11 @@ const ProductList = async () => {
 
 	return (
 		<div>
+			<Button variant={"secondary"}>
+				<Link href={"/products/add"}>Thêm sản phẩm</Link>
+			</Button>
 			<h1 className="text-center text-2xl">Danh sách sản phẩm</h1>
+
 			<div className="space-y-5">
 				{productList.map((product) => (
 					<div key={product.id} className="flex space-x-4">
@@ -23,7 +28,9 @@ const ProductList = async () => {
 						<div>{product.price}</div>
 						<div>{product.description}</div>
 						<div className="flex space-x-2">
-							<Button variant={"outline"}>Edit</Button>
+							<Link href={`products/${product.id}`}>
+								<Button variant={"outline"}>Edit</Button>
+							</Link>
 							<Button variant={"destructive"}>Delete</Button>
 						</div>
 					</div>
