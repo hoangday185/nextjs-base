@@ -42,7 +42,7 @@ const LoginForm = () => {
 				expiresAt: res.payload.data.expiresAt,
 			});
 
-			router.push("/me");
+			router.push("/");
 		} catch (error) {
 			handleErrorApi({
 				error,
@@ -51,6 +51,7 @@ const LoginForm = () => {
 			});
 		} finally {
 			setLoading(false);
+			router.refresh();
 		}
 	}
 

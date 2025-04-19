@@ -8,10 +8,7 @@ import {
 } from "@/schemaValidations/product.schema";
 
 const productApRequest = {
-	get: () =>
-		http.get<ProductListResType>("/products", {
-			cache: "default",
-		}),
+	get: () => http.get<ProductListResType>("/products"),
 	getDetail: (id: number) => http.get<ProductResType>(`/products/${id}`),
 	create: (body: CreateProductBodyType) =>
 		http.post<ProductResType>("/products", body),

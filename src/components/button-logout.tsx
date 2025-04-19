@@ -16,6 +16,8 @@ const BtnLogout = () => {
 			authApiRequest.logoutFormNextClientToServer(true).then(() => {
 				router.push("/login");
 			});
+		} finally {
+			router.refresh();
 		}
 	};
 	return (

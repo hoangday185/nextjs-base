@@ -57,6 +57,7 @@ const RegisterForm = () => {
 			});
 		} finally {
 			setLoading(false);
+			router.refresh();
 		}
 	}
 
