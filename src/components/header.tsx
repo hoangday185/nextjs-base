@@ -8,6 +8,9 @@ const Header = () => {
 		<div>
 			<ul>
 				<li>
+					<Link href={"/products/add"}>Tạo sản phẩm mới</Link>
+				</li>
+				<li>
 					<Link href={"/login"}>Đăng nhập</Link>
 				</li>
 				<li>

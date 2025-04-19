@@ -85,11 +85,24 @@ const request = async <Response>(
 	url: string,
 	options?: CustomOptions
 ) => {
-	const body = options?.body ? JSON.stringify(options.body) : undefined;
-	const baseHeaders = {
-		"Content-Type": "application/json",
-		Authorization: sessionToken.value ? `Bearer ${sessionToken.value}` : "",
-	};
+	const body = options?.body
+		? options.body instanceof FormData
+			? options.body
+			: JSON.stringify(options.body)
+		: undefined;
+	const baseHeaders =
+		body instanceof FormData
+			? ({
+					Authorization: sessionToken.value
+						? `Bearer ${sessionToken.value}`
+						: "",
+			  } as any)
+			: ({
+					"Content-Type": "application/json",
+					Authorization: sessionToken.value
+						? `Bearer ${sessionToken.value}`
+						: "",
+			  } as any);
 	const baseUrl =
 		options?.baseUrl === undefined
 			? process.env.NEXT_PUBLIC_API_ENDPOINT
