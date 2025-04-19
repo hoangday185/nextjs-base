@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-// import Profile from "./profile";
+import Profile from "./profile";
 import accountApiRequest from "@/apiRequest/account";
 
 const ProfilePage = async () => {
@@ -12,7 +12,7 @@ const ProfilePage = async () => {
 	return (
 		<div>
 			<h1>Profile</h1>
-			{/* <Profile /> */}
+			<Profile />
 		</div>
 	);
 };

@@ -7,6 +7,7 @@ import Header from "@/components/header";
 import { Toaster } from "sonner";
 import AppProvider from "./AppProvider";
 import { cookies } from "next/headers";
+import SlideSession from "@/components/slide-session";
 
 const inter = Inter({
 	subsets: ["vietnamese"],
@@ -37,6 +38,7 @@ export default async function RootLayout({
 					<AppProvider initialSessionToken={sessionToken}>
 						{children}
 						<Toaster />
+						<SlideSession />
 					</AppProvider>
 				</ThemeProvider>
 			</body>

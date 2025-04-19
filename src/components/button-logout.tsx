@@ -13,6 +13,9 @@ const BtnLogout = () => {
 			router.push("/login");
 		} catch (error) {
 			handleErrorApi({ error });
+			authApiRequest.logoutFormNextClientToServer(true).then(() => {
+				router.push("/login");
+			});
 		}
 	};
 	return (
