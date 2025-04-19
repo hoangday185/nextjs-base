@@ -8,6 +8,7 @@ const ProductEdit = async ({ params }: { params: Promise<{ id: string }> }) => {
 	const { id } = await params;
 	try {
 		const { payload } = await productApRequest.getDetail(Number(id));
+		//default là no cache
 		product = payload.data;
 	} catch (error) {
 		console.log(error);
