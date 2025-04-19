@@ -1,17 +1,24 @@
 import productApRequest from "@/apiRequest/product";
 import React from "react";
+import ProductForm from "../_components/product-form";
+import { ProductResType } from "@/schemaValidations/product.schema";
 
-const ProductEdit = async ({ params }: { params: { id: string } }) => {
+const ProductEdit = async ({ params }: { params: Promise<{ id: string }> }) => {
 	let product = null;
+	const { id } = await params;
 	try {
-		const { payload } = await productApRequest.getDetail(Number(params.id));
+		const { payload } = await productApRequest.getDetail(Number(id));
 		product = payload.data;
-		console.log(product);
 	} catch (error) {
 		console.log(error);
 	}
 
-	return <div>ngon</div>;
+	return (
+		<div>
+			{!product && <div>Ko tìm thấy product</div>}
+			<ProductForm product={product as ProductResType["data"]} />
+		</div>
+	);
 };
 
 export default ProductEdit;

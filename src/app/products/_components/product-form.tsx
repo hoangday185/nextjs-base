@@ -16,26 +16,33 @@ import { handleErrorApi } from "@/lib/utils";
 import {
 	CreateProductBody,
 	CreateProductBodyType,
+	ProductResType,
+	UpdateProductBodyType,
 } from "@/schemaValidations/product.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-const ProductForm = () => {
+type Product = ProductResType["data"];
+
+const ProductForm = ({ product }: { product?: Product }) => {
 	const [image, setImage] = useState<File | null>(null);
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 	const form = useForm<CreateProductBodyType>({
 		resolver: zodResolver(CreateProductBody),
 		defaultValues: {
-			name: "",
-			description: "",
-			price: 0,
-			image: "",
+			name: product?.name ?? "",
+			description: product?.description ?? "",
+			price: product?.price ?? 0,
+			image: product?.image ?? "",
 		},
 	});
+
+	const imageFormFile = form.watch("image");
 
 	// const { handleSubmit } = form;
 	// const onSubmit = handleSubmit(async (values: CreateProductBodyType) => {
@@ -66,10 +73,7 @@ const ProductForm = () => {
 	// 	}
 	// });
 
-	const onSubmit = async (values: CreateProductBodyType) => {
-		if (loading) return;
-
-		setLoading(true);
+	const createProduct = async (values: CreateProductBodyType) => {
 		try {
 			const formData = new FormData();
 			formData.append("file", image as Blob);
@@ -89,6 +93,46 @@ const ProductForm = () => {
 			});
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const updateProduct = async (_values: UpdateProductBodyType) => {
+		if (!product) return;
+		let values = _values;
+		setLoading(true);
+		try {
+			if (image) {
+				const formData = new FormData();
+				formData.append("file", image as Blob);
+				const result = await productApRequest.uploadImage(formData);
+				values = {
+					...values,
+					image: result.payload.data,
+				};
+			}
+
+			await productApRequest.update(Number(product.id), values);
+
+			toast.success("Cập nhật thành công");
+		} catch (error) {
+			handleErrorApi({
+				error,
+				setError: form.setError,
+				duration: 1000,
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const onSubmit = async (values: CreateProductBodyType) => {
+		if (loading) return;
+
+		setLoading(true);
+		if (product) {
+			await updateProduct(values as UpdateProductBodyType);
+		} else {
+			await createProduct(values);
 		}
 	};
 
@@ -171,10 +215,10 @@ const ProductForm = () => {
 					)}
 				/>
 
-				{image && (
+				{(image || imageFormFile) && (
 					<div className="flex items-center gap-2">
 						<Image
-							src={URL.createObjectURL(image)}
+							src={image ? URL.createObjectURL(image) : imageFormFile}
 							width={128}
 							height={128}
 							alt="image"
@@ -194,7 +238,7 @@ const ProductForm = () => {
 				)}
 
 				<Button type="submit" className="!mt-4 w-full">
-					Submit
+					{product ? "Cập nhật" : "Tạo mới"}
 				</Button>
 			</form>
 		</Form>
