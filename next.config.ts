@@ -5,10 +5,10 @@ const nextConfig: NextConfig = {
 	images: {
 		remotePatterns: [
 			{
-				protocol: "https",
-				hostname: "bs-uploads.toptal.io",
-				port: "",
-				pathname: "/**",
+				protocol: "http",
+				hostname: "localhost",
+				port: "4000",
+				pathname: "/static/*",
 			},
 		],
 	},

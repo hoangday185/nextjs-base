@@ -80,7 +80,7 @@ const ProductForm = () => {
 				image: imageUrl,
 			});
 
-			// router.push("/products");
+			router.push("/products");
 		} catch (error) {
 			handleErrorApi({
 				error,
