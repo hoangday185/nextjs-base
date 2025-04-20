@@ -3,16 +3,23 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import ButtonDelete from "./_components/ButtonDelete";
+import { cookies } from "next/headers";
 
 const ProductList = async () => {
+	const cookieStore = await cookies();
+	const sessionToken = cookieStore.get("sessionToken")?.value;
+	const isAuth = Boolean(sessionToken);
 	const res = await productApRequest.get();
 	const productList = res.payload.data;
 
 	return (
 		<div>
-			<Button variant={"secondary"}>
-				<Link href={"/products/add"}>Thêm sản phẩm</Link>
-			</Button>
+			{isAuth && (
+				<Button variant={"secondary"}>
+					<Link href={"/products/add"}>Thêm sản phẩm</Link>
+				</Button>
+			)}
+
 			<h1 className="text-center text-2xl">Danh sách sản phẩm</h1>
 
 			<div className="space-y-5">
@@ -28,12 +35,14 @@ const ProductList = async () => {
 						<h3>{product.name}</h3>
 						<div>{product.price}</div>
 						<div>{product.description}</div>
-						<div className="flex space-x-2">
-							<Link href={`products/${product.id}`}>
-								<Button variant={"outline"}>Edit</Button>
-							</Link>
-							<ButtonDelete product={product} />
-						</div>
+						{isAuth && (
+							<div className="flex space-x-2">
+								<Link href={`products/${product.id}`}>
+									<Button variant={"outline"}>Edit</Button>
+								</Link>
+								<ButtonDelete product={product} />
+							</div>
+						)}
 					</div>
 				))}
 			</div>
