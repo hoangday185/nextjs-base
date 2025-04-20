@@ -2,9 +2,6 @@ import React from "react";
 import { ModeToggle } from "./toggle-mode";
 import Link from "next/link";
 import BtnLogout from "./button-logout";
-import { cookies } from "next/headers";
-import accountApiRequest from "@/apiRequest/account";
-import { handleErrorApi } from "@/lib/utils";
 import { AccountResType } from "@/schemaValidations/account.schema";
 
 const Header = async ({ user }: { user: AccountResType["data"] }) => {

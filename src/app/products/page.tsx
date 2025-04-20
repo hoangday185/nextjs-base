@@ -25,19 +25,22 @@ const ProductList = async () => {
 			<div className="space-y-5">
 				{productList.map((product) => (
 					<div key={product.id} className="flex space-x-4 items-start">
-						<Image
-							src={product.image}
-							width={200}
-							height={200}
-							alt={product.name}
-							className="h-32 w-32 object-cover"
-						/>
+						<Link href={`/products/${product.id}`}>
+							<Image
+								src={product.image}
+								width={200}
+								height={200}
+								alt={product.name}
+								className="h-32 w-32 object-cover"
+							/>
+						</Link>
+
 						<h3>{product.name}</h3>
 						<div>{product.price}</div>
 						<div>{product.description}</div>
 						{isAuth && (
 							<div className="flex space-x-2">
-								<Link href={`products/${product.id}`}>
+								<Link href={`products/${product.id}/edit`}>
 									<Button variant={"outline"}>Edit</Button>
 								</Link>
 								<ButtonDelete product={product} />
